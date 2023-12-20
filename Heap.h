@@ -144,27 +144,23 @@ void bucketSort(T array[], int size){
         }
     }
 
-    // Create n empty buckets
     const int numBuckets = size;
-    int* bucketSizes = new int[numBuckets](); // Array to store the size of each bucket
-    int** buckets = new int*[numBuckets]; // Array of arrays to represent buckets
+    int* bucketSizes = new int[numBuckets]();
+    int** buckets = new int*[numBuckets];
 
     for (int i = 0; i < numBuckets; i++) {
         buckets[i] = new int[size];
     }
 
-    // Put array elements in different buckets
     for (int i = 0; i < size; i++) {
-        int bi = static_cast<int>(size * (static_cast<float>(array[i]) / maxVal));
+        int bi = (int)(size * ((float)(array[i]) / maxVal));
         buckets[bi][bucketSizes[bi]++] = array[i];
     }
 
-    // Sort individual buckets using std::sort
     for (int i = 0; i < numBuckets; i++) {
         bubleSort(buckets[i], bucketSizes[i]);
     }
 
-    // Concatenate all buckets into arr[]
     int index = 0;
     for (int i = 0; i < numBuckets; i++) {
         for (int j = 0; j < bucketSizes[i]; j++) {
@@ -172,7 +168,6 @@ void bucketSort(T array[], int size){
         }
     }
 
-    // Clean up dynamically allocated memory
     delete[] bucketSizes;
     for (int i = 0; i < numBuckets; i++) {
         delete[] buckets[i];
