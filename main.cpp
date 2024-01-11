@@ -3,21 +3,22 @@
 #include <random>
 #include <cstring>
 #include <cstdlib>
+#include <vector>
 
 
 using namespace std;
 
 class SomeObject {
 public:
-    int num;
-    string line;
+    double num;
+    char line;
 
     SomeObject() {
-        num = 1;
-        line = "default";
+        num = 1.0;
+        line = '\0';
     }
 
-    SomeObject(int num, string line) : num(num), line(line) {}
+    SomeObject(double num, char line) : num(num), line(line) {}
 
     friend ostream& operator<<(ostream& os, const SomeObject& so) {
         os << "Num: " << so.num << ", Line: " << so.line;
@@ -45,32 +46,33 @@ int numCompare(SomeObject* a, SomeObject* b) {
 }
 
 double objectKey(SomeObject* so) {
-    return static_cast<double>(so->num) / 100.0;
+    return so->num;
 }
 
 SomeObject randomObject() {
-    random_device rd;
-    default_random_engine gen(rd());
 
-    uniform_int_distribution<int> numDistribution(1, 100);
-    int randomNum = numDistribution(gen);
+    static random_device rd;
+    static default_random_engine gen(1/*rd()*/);
 
-    uniform_int_distribution<int> lineLengthDistribution(5, 15);
-    int lineLength = lineLengthDistribution(gen);
+    uniform_real_distribution<double> numDistribution;
+    double randomNum = numDistribution(gen);
 
-    uniform_int_distribution<char> charDistribution('a', 'z');
+   /* uniform_int_distribution<int> lineLengthDistribution(5, 15);
+    int lineLength = lineLengthDistribution(gen);*/
+
+    uniform_int_distribution<int> charDistribution('a', 'z');
     string randomLine;
-    for (int i = 0; i < lineLength; ++i) {
+    //for (int i = 0; i < lineLength; ++i) {
         randomLine += charDistribution(gen);
-    }
+    //}
 
-    return {randomNum, randomLine};
+    return { randomNum, randomLine.front() };
 }
 
 template<typename T>
 class MaxHeap {
 public:
-    T *array;
+    T* array;
     int size;
     int capacity;
 
@@ -83,13 +85,13 @@ public:
         this->size = capacity;
         this->capacity = capacity;
 
-        if (flag){
+        if (flag) {
             for (int i = 1; i < size; i++) {
                 heapifyUp(i, compar);
             }
         }
         else {
-            for (int i=(size/2)-1; i>=0; i--) {
+            for (int i = (size / 2) - 1; i >= 0; i--) {
                 heapifyDown(i, compar);
             }
         }
@@ -108,23 +110,23 @@ public:
 
     int right(T number) { return (2 * number + 2); }
 
-    void swap(T &x, T &y) {
+    void swap(T& x, T& y) {
         T temp = x;
         x = y;
         y = temp;
     }
 
-    void heapifyUp(int index, int(*compare)(T, T)){
-        int p = (index-1)/2;//parent(index);
-        if(index!=0 && compare(array[index], array[p]) > 0){
+    void heapifyUp(int index, int(*compare)(T, T)) {
+        int p = (index - 1) / 2;//parent(index);
+        if (index != 0 && compare(array[index], array[p]) > 0) {
             swap(array[index], array[p]);
             heapifyUp(p, compare);
         }
     }
 
     void heapifyDown(int index, int(*compare)(T, T)) {
-        int l = 2*index+1;//left(index);
-        int r = 2*index+2;//right(index);
+        int l = 2 * index + 1;//left(index);
+        int r = 2 * index + 2;//right(index);
         int max = index;
 
         if (r < size && compare(array[r], array[max]) > 0) {
@@ -156,9 +158,9 @@ public:
     }
 };
 
-void countingSortInteger(int *array, int size, int m) {
-    int *count = new int[m]();
-    int *result = new int[size];
+void countingSortInteger(int* array, int size, int m) {
+    int* count = new int[m]();
+    int* result = new int[size];
 
     for (int i = 0; i < size; i++) {
         count[array[i]]++;
@@ -181,7 +183,7 @@ void countingSortInteger(int *array, int size, int m) {
     delete[] result;
 }
 
-void bubbleSort(int *array, int size) {
+void bubbleSort(int* array, int size) {
     for (int i = 0; i < size - 1; i++) {
         for (int j = 0; j < size - i - 1; j++) {
             if (array[j] > array[j + 1]) {
@@ -193,7 +195,7 @@ void bubbleSort(int *array, int size) {
     }
 }
 
-void bucketSortInt(int *array, int n, int m) {
+void bucketSortInt(int* array, int n, int m) {
     if (array == nullptr || n <= 1) {
         return;
     }
@@ -240,8 +242,8 @@ template <typename T>
 using ComparatorFunction = int (*)(T, T);
 
 template <typename T>
-void insertionSort(T* array, int n, ComparatorFunction<T> comparator) {
-    for (int i = 1; i < n; ++i) {
+void insertionSort(vector<T>& array, ComparatorFunction<T> comparator) {
+    for (int i = 1; i < array.size(); ++i) {
         T key = array[i];
         int j = i - 1;
         while (j >= 0 && comparator(array[j], key) > 0) {
@@ -256,33 +258,27 @@ template <typename T>
 void bucketSortObject(T* array, int n, double m, KeyFunction<T> keyFunction, ComparatorFunction<T> comparator) {
     int num_buckets = n;
 
-    T** buckets = new T*[num_buckets];
-    int* bucketSizes = new int[num_buckets]();
+    vector<vector<T>> buckets(num_buckets);
+
 
     for (int i = 0; i < n; i++) {
         int index = static_cast<int>(keyFunction(array[i]) * n);
-        if (bucketSizes[index] == 0) {
-            buckets[index] = new T[n];
-        }
-        buckets[index][bucketSizes[index]++] = array[i];
+        buckets[index].push_back(array[i]);
     }
 
     for (int i = 0; i < num_buckets; i++) {
-        if (bucketSizes[i] > 1) {
-            insertionSort(buckets[i], bucketSizes[i], comparator);
+        int bucketSize = static_cast<int>(buckets[i].size());
+        if (buckets[i].size() > 1) {
+            insertionSort(buckets[i], comparator);
         }
     }
 
     int idx = 0;
     for (int i = 0; i < num_buckets; i++) {
-        for (int j = 0; j < bucketSizes[i]; j++) {
-            array[idx++] = buckets[i][j];
+        for (int j = 0; j < static_cast<int>(buckets[i].size()); ++j) {
+              array[idx++] = buckets[i][j];
         }
-        delete[] buckets[i];
     }
-
-    delete[] buckets;
-    delete[] bucketSizes;
 }
 
 template<typename T>
@@ -299,7 +295,7 @@ void printArrayObjects(SomeObject** so, int n) {
     }
 }
 
-int randomValue(){
+int randomValue() {
     random_device rd;
     default_random_engine dfe(rd());
     uniform_int_distribution<int> number(1, 200);
@@ -307,7 +303,7 @@ int randomValue(){
 }
 
 //int main() {
-//    const int MAX_ORDER = 7;
+//    const int MAX_ORDER = 6;
 //    const int m = (int) pow (10 , 7);
 //
 //    for ( int o = 1; o <= MAX_ORDER ; o ++) {
@@ -358,44 +354,52 @@ int randomValue(){
 //    return 0;
 //}
 
-int main(){
-    const int MAX_ORDER = 1;
-    const double m_double = static_cast<double>(pow(2, 30));
+int main() {
+    const int MAX_ORDER = 7;
 
-    for ( int o = 1; o <= MAX_ORDER ; o ++) {
-        const int n = (int) pow(10, o); // rozmiar tablicy z danymi
-        SomeObject **array1 = new SomeObject * [n];
+    for (int o = 1; o <= MAX_ORDER; o++) {
+        const int n = (int)pow(10, o);
+        SomeObject** array1 = new SomeObject * [n];
         for (int i = 0; i < n; i++) {
             array1[i] = new SomeObject(randomObject());
         }
 
-        cout << "Main array:" << endl;
-        printArrayObjects(array1, n);
+        //cout << "Main array:" << endl;
+        //printArrayObjects(array1, n);
+        //cout << endl;
 
         SomeObject** array2 = new SomeObject * [n];
-        memcpy(array2, array1, n* sizeof(SomeObject*));
+        memcpy(array2, array1, n * sizeof(SomeObject*));
 
         clock_t t1 = clock();
-        MaxHeap<SomeObject*>* bh = new MaxHeap<SomeObject*>(array1, n, numCompare, true);
+        MaxHeap<SomeObject*>* bh = new MaxHeap<SomeObject*>(array1, n, numCompare, false);
         bh->sort(numCompare);
         clock_t t2 = clock();
         double time = static_cast<double>(t2 - t1) / CLOCKS_PER_SEC;
-        cout << "Time to sort by heap sort " << n << " element: " << time << " seconds" << endl;
-        printArrayObjects(array1, n);
+        cout << "Time to sort by heap sort " << n << " objects: " << time << " seconds" << endl;
+        //printArrayObjects(array1, n);
 
         t1 = clock();
         bucketSortObject<SomeObject*>(array2, n, 1.0, objectKey, numCompare);
-        t2= clock();
+        t2 = clock();
         time = static_cast<double>(t2 - t1) / CLOCKS_PER_SEC;
-        cout << "Time to sort by bucket sort " << n << " element: " << time << " seconds" << endl;
-        printArrayObjects(array2, n);
+        cout << "Time to sort by bucket sort " << n << " objects: " << time << " seconds" << endl;
+        //printArrayObjects(array2, n);
+
+        int trueCounter = 0;
+        for (int i = 0; i < n; i++) {
+            if (array1[i]->num == array2[i]->num && array1[i]->line == array2[i]->line) {
+                trueCounter++;
+            }
+        }
+        cout << "Equals object = " << trueCounter << endl;
 
         for (int i = 0; i < n; i++) {
             delete array1[i];
-            delete array2[i];
         }
         delete[] array1;
         delete[] array2;
+        //delete bh;
     }
 
     return 0;
