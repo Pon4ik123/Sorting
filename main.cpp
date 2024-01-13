@@ -302,59 +302,57 @@ int randomValue() {
     return number(dfe);
 }
 
-//int main() {
-//    const int MAX_ORDER = 6;
-//    const int m = (int) pow (10 , 7);
-//
-//    for ( int o = 1; o <= MAX_ORDER ; o ++) {
-//
-//        const int n = (int) pow(10, o);
-//        int *array1 = new int[n];
-//        for (int i = 0; i < n; i++) {
-//            int rand_val = randomValue();
-//            array1[i] = rand_val;
-//        }
-//        //cout << "Main array: ";
-//        //printArrayInteger(array1, n);
-//
-//        int* array2 = new int [n];
-//        int* array3 = new int [n];
-//        memcpy(array2, array1, n*sizeof(int));
-//        memcpy(array3, array1, n*sizeof(int));
-//
-//        clock_t t1 = clock () ;
-//        countingSortInteger(array1, n, m);
-//        clock_t t2 = clock () ;
-//        double time = static_cast<double>(t2 - t1) / CLOCKS_PER_SEC;
-//        cout << "Time to sort by counting sort " << n << " element: " << time << " seconds" << endl;
-//        //printArrayInteger(array1, n);
-//
-//
-//        t1 = clock ();
-//        auto* bh = new MaxHeap<int>(array2, n, compare, false);
-//        bh->sort(compare);
-//        t2 = clock();
-//        time = static_cast<double>(t2 - t1) / CLOCKS_PER_SEC;
-//        cout << "Time to sort by heap sort " << n << " element: " << time << " seconds" << endl;
-//        //printArrayInteger(array2, n);
-//
-//        t1 = clock ();
-//        bucketSortInt(array3, n, m);
-//        t2 = clock();
-//        time = static_cast<double>(t2 - t1) / CLOCKS_PER_SEC;
-//        cout << "Time to sort by bucket sort " << n << " element: " << time << " seconds" << endl;
-//        //printArrayInteger(array3, n);
-//        cout << endl;
-//
-//        delete[] array1;
-//        delete[] array2;
-//        delete[] array3;
-//    }
-//
-//    return 0;
-//}
+void main_inits() {
+    const int MAX_ORDER = 6;
+    const int m = (int) pow (10 , 7);
 
-int main() {
+    for ( int o = 1; o <= MAX_ORDER ; o ++) {
+
+        const int n = (int) pow(10, o);
+        int *array1 = new int[n];
+        for (int i = 0; i < n; i++) {
+            int rand_val = randomValue();
+            array1[i] = rand_val;
+        }
+        //cout << "Main array: ";
+        //printArrayInteger(array1, n);
+
+        int* array2 = new int [n];
+        int* array3 = new int [n];
+        memcpy(array2, array1, n*sizeof(int));
+        memcpy(array3, array1, n*sizeof(int));
+
+        clock_t t1 = clock () ;
+        countingSortInteger(array1, n, m);
+        clock_t t2 = clock () ;
+        double time = static_cast<double>(t2 - t1) / CLOCKS_PER_SEC;
+        cout << "Time to sort by counting sort " << n << " element: " << time << " seconds" << endl;
+        //printArrayInteger(array1, n);
+
+
+        t1 = clock ();
+        auto* bh = new MaxHeap<int>(array2, n, compare, false);
+        bh->sort(compare);
+        t2 = clock();
+        time = static_cast<double>(t2 - t1) / CLOCKS_PER_SEC;
+        cout << "Time to sort by heap sort " << n << " element: " << time << " seconds" << endl;
+        //printArrayInteger(array2, n);
+
+        t1 = clock ();
+        bucketSortInt(array3, n, m);
+        t2 = clock();
+        time = static_cast<double>(t2 - t1) / CLOCKS_PER_SEC;
+        cout << "Time to sort by bucket sort " << n << " element: " << time << " seconds" << endl;
+        //printArrayInteger(array3, n);
+        cout << endl;
+
+        delete[] array1;
+        delete[] array2;
+        delete[] array3;
+    }
+}
+
+void main_some_objects() {
     const int MAX_ORDER = 7;
 
     for (int o = 1; o <= MAX_ORDER; o++) {
@@ -364,9 +362,9 @@ int main() {
             array1[i] = new SomeObject(randomObject());
         }
 
-        //cout << "Main array:" << endl;
-        //printArrayObjects(array1, n);
-        //cout << endl;
+        cout << "Main array:" << endl;
+        printArrayObjects(array1, n);
+        cout << endl;
 
         SomeObject** array2 = new SomeObject * [n];
         memcpy(array2, array1, n * sizeof(SomeObject*));
@@ -377,14 +375,14 @@ int main() {
         clock_t t2 = clock();
         double time = static_cast<double>(t2 - t1) / CLOCKS_PER_SEC;
         cout << "Time to sort by heap sort " << n << " objects: " << time << " seconds" << endl;
-        //printArrayObjects(array1, n);
+        printArrayObjects(array1, n);
 
         t1 = clock();
         bucketSortObject<SomeObject*>(array2, n, 1.0, objectKey, numCompare);
         t2 = clock();
         time = static_cast<double>(t2 - t1) / CLOCKS_PER_SEC;
         cout << "Time to sort by bucket sort " << n << " objects: " << time << " seconds" << endl;
-        //printArrayObjects(array2, n);
+        printArrayObjects(array2, n);
 
         int trueCounter = 0;
         for (int i = 0; i < n; i++) {
@@ -399,8 +397,12 @@ int main() {
         }
         delete[] array1;
         delete[] array2;
-        //delete bh;
     }
+}
+
+int main(){
+    main_inits();
+    main_some_objects();
 
     return 0;
 }
